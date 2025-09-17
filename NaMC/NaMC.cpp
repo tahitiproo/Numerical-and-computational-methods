@@ -1,11 +1,9 @@
-﻿// NaMC.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
-
+﻿
 #include <iostream>
-
+//
 int main()
 {
-    printf("Hello World!\n");
+    printf("Hello World! I love you. Love you too?\n");
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
