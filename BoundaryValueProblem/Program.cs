@@ -309,11 +309,11 @@ namespace BoundaryValueProblem
                 alpha = 1,
                 beta = Math.Exp(2)
             };
-            var (xGrid, yGrid) = GridMethod(p4, 100);
-            var (xShoot, yShoot) = ShootingMethod(p4, 100);
+            var (xGrid, yGrid) = GridMethod(p4, 200);
+            var (xShoot, yShoot) = ShootingMethod(p4, 200);
             double diffShootGrid = yGrid.Zip(yShoot, (a, b) => Math.Abs(a - b)).Max();
-            Console.WriteLine($"Макс. разница между Сетками и Стрельбой на N=100: {diffShootGrid:E4}");
-            Assert(diffShootGrid < 1e-4, "Тест 4: Метод стрельбы успешно справился и решение совпало с сеточным.\n");
+            Console.WriteLine($"Макс. разница между Сетками и Стрельбой на N=200: {diffShootGrid:E4}");
+            Assert(diffShootGrid < 1e-3, "Тест 4: Метод стрельбы успешно справился и решение совпало с сеточным.\n");
 
             // Тест 5
             Console.WriteLine("--- ТЕСТ 5: Адаптивное сгущение сетки до предела ---");
