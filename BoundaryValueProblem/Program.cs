@@ -341,7 +341,7 @@ namespace BoundaryValueProblem
             Assert(diffShootGrid < 1e-3, "Тест 4: Метод стрельбы успешно справился и решение совпало с сеточным.\n");
 
             // Тест 5
-            Console.WriteLine("--- ТЕСТ 5 (Нетривиальный): Адаптивное сгущение сетки до предела ---");
+            Console.WriteLine("--- ТЕСТ 5: Адаптивное сгущение сетки до предела ---");
             Console.WriteLine("Сетка автоматически удваивается, пока погрешность не перестанет падать...");
             var (xFinal, yFinal, finalDelta, finalN) = AdaptiveGridMethod(p2, 1e-14); // Зададим очень маленькую точность, чтобы зафорсить предел
             Console.WriteLine($"\nПредел float64/точности обнаружен на N = {finalN}");
