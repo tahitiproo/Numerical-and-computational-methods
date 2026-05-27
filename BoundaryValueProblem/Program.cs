@@ -107,6 +107,9 @@ namespace BoundaryValueProblem
             var (x1, y1) = GridMethod(p, N);
             double prevDelta = double.MaxValue;
 
+            Console.WriteLine($"{"N",8} | {"Шаг h",12} | {"Оценка Ричардсона Δ",20}");
+            Console.WriteLine(new string('-', 45));
+
             while (N <= 1_000_000)
             {
                 var (x2, y2) = GridMethod(p, N * 2);
@@ -118,8 +121,10 @@ namespace BoundaryValueProblem
                     if (delta > maxDelta) maxDelta = delta;
                 }
 
+                Console.WriteLine($"{N * 2,8} | {(p.b - p.a) / (N * 2),12:E4} | {maxDelta,20:E4}");
+
                 // Проверка выхода на плато ошибок округления (деградация точности)
-                if (maxDelta > prevDelta)
+                if (maxDelta >= prevDelta && maxDelta > 0)
                 {
                     Console.WriteLine($"[!] Сетка стала слишком мелкой (N={N * 2}), накапливаются ошибки округления.");
                     break;
@@ -140,6 +145,26 @@ namespace BoundaryValueProblem
             // Если дошли сюда, выдаем лучшее найденное ДО деградации
             var (xr, yr, finalD) = RichardsonRefine(p, N / 2);
             return (xr, yr, finalD, N);
+        }
+
+        // Вывод элементов массива с определенным шагом для обзора
+        static void PrintSummary(double[] x, double[] y, int stepPoints = 10)
+        {
+            Console.WriteLine("\nВывод полученного приближения (выборочные узлы):");
+            Console.WriteLine($"{"x",10} | {"u(x)",15}");
+            Console.WriteLine(new string('-', 30));
+            int step = Math.Max(1, x.Length / stepPoints);
+            for (int i = 0; i < x.Length; i += step)
+            {
+                Console.WriteLine($"{x[i],10:F4} | {y[i],15:F6}");
+            }
+            // Вывод последней точки, если она не попала в шаг
+            if ((x.Length - 1) % step != 0)
+            {
+                int last = x.Length - 1;
+                Console.WriteLine($"{x[last],10:F4} | {y[last],15:F6}");
+            }
+            Console.WriteLine();
         }
 
         // 2. Метод стрельбы (Рунге-Кутта 4 + Метод Хо́рд/Секущих)
@@ -316,12 +341,16 @@ namespace BoundaryValueProblem
             Assert(diffShootGrid < 1e-3, "Тест 4: Метод стрельбы успешно справился и решение совпало с сеточным.\n");
 
             // Тест 5
-            Console.WriteLine("--- ТЕСТ 5: Адаптивное сгущение сетки до предела ---");
+            Console.WriteLine("--- ТЕСТ 5 (Нетривиальный): Адаптивное сгущение сетки до предела ---");
             Console.WriteLine("Сетка автоматически удваивается, пока погрешность не перестанет падать...");
-            var (_, _, finalDelta, finalN) = AdaptiveGridMethod(p2, 1e-12);
-            Console.WriteLine($"Предел float64/точности обнаружен на N = {finalN}");
+            var (xFinal, yFinal, finalDelta, finalN) = AdaptiveGridMethod(p2, 1e-14); // Зададим очень маленькую точность, чтобы зафорсить предел
+            Console.WriteLine($"\nПредел float64/точности обнаружен на N = {finalN}");
             Console.WriteLine($"Финально достигнутая разностная точность Δ: {finalDelta:E2}");
-            Assert(finalN >= 4096 && finalN <= 1_000_000, "Тест 5: Метод адаптивного сгущения благополучно обнаружил предел ошибок округления и остановился.\n");
+
+            // Вывод полученного приближения
+            PrintSummary(xFinal, yFinal, 10);
+
+            Assert(finalN >= 4096 && finalN <= 1_000_000, "Тест 5: Метод адаптивного сгущения благополучно обнаружил предел ошибок округления, остановился и вывел приближение.\n");
 
             Console.WriteLine(new string('=', 80) + "\n");
         }
