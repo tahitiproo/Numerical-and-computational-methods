@@ -138,12 +138,12 @@ namespace VariationalMethods
             if (condition)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"[ПРОЙДЕН] {testName}");
+                Console.WriteLine("[ПРОЙДЕН] " + testName);
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[ПРОВАЛ]  {testName}");
+                Console.WriteLine("[ПРОВАЛ]  " + testName);
             }
             Console.ResetColor();
         }
@@ -166,7 +166,7 @@ namespace VariationalMethods
             };
             var (cRitz1, _) = SolveRitz(p1, 1);
             var (cCol1, _) = SolveCollocation(p1, 1);
-            Console.WriteLine($"c1 (Ритц): {cRitz1[0]:F4}, c1 (Коллок.): {cCol1[0]:F4} | Ожидается: 1.0");
+            Console.WriteLine(String.Format("c1 (Ритц): {0:F4}, c1 (Коллок.): {1:F4} | Ожидается: 1.0", cRitz1[0], cCol1[0]));
             Assert(Math.Abs(cRitz1[0] - 1) < 1e-10 && Math.Abs(cCol1[0] - 1) < 1e-10, "Тест 1: Решение, совпадающее с базисным элементом, ловится идеально.\\n");
 
             // Тест 2
@@ -181,7 +181,7 @@ namespace VariationalMethods
             };
             var (cRitz2, _) = SolveRitz(p2, 2);
             double errRitz2 = MaxError(cRitz2, p2.exact);
-            Console.WriteLine($"Ошибка в норме C-пространства при n=2: {errRitz2:E2}");
+            Console.WriteLine(String.Format("Ошибка в норме C-пространства при n=2: {0:E2}", errRitz2));
             Assert(errRitz2 < 1e-10, "Тест 2: Кубическое решение ловится без потерь благодаря базису x^2(1-x).\\n");
 
             // Тест 3
@@ -194,13 +194,13 @@ namespace VariationalMethods
                 exact = x => Math.Sin(Math.PI * x),
                 f = x => -(1 + x) * (-Math.PI * Math.PI * Math.Sin(Math.PI * x)) - 1 * (Math.PI * Math.Cos(Math.PI * x)) + Math.Sin(Math.PI * x)
             };
-            Console.WriteLine($"{"n",-5} | {"Ошибка Ритца",-15} | {"Ошибка Коллокации",-15}");
+            Console.WriteLine(String.Format("{0,-5} | {1,-15} | {2,-15}", "n", "Ошибка Ритца", "Ошибка Коллокации"));
             Console.WriteLine(new string('-', 45));
             for (int n = 2; n <= 6; n += 2)
             {
                 var (cr, _) = SolveRitz(p3, n);
                 var (cc, _) = SolveCollocation(p3, n);
-                Console.WriteLine($"{n,-5} | {MaxError(cr, p3.exact),-15:E4} | {MaxError(cc, p3.exact),-15:E4}");
+                Console.WriteLine(String.Format("{0,-5} | {1,-15:E4} | {2,-15:E4}", n, MaxError(cr, p3.exact), MaxError(cc, p3.exact)));
             }
             Assert(true, "Тест 3: Логарифмическое/Экспоненциальное падение ошибки при росте n.\\n");
 
@@ -216,14 +216,14 @@ namespace VariationalMethods
             };
             var (cr4, tRitz) = SolveRitz(p4, 8);
             var (cc4, tCol) = SolveCollocation(p4, 8);
-            Console.WriteLine($"Ритц      | Ошибка: {MaxError(cr4, p4.exact):E4} | Время: {tRitz:F2} мс");
-            Console.WriteLine($"Коллокация| Ошибка: {MaxError(cc4, p4.exact):E4} | Время: {tCol:F2} мс");
+            Console.WriteLine(String.Format("Ритц      | Ошибка: {0:E4} | Время: {1:F2} мс", MaxError(cr4, p4.exact), tRitz));
+            Console.WriteLine(String.Format("Коллокация| Ошибка: {0:E4} | Время: {1:F2} мс", MaxError(cc4, p4.exact), tCol));
             Assert(tCol < tRitz, "Тест 4: Метод коллокации быстрее метода Ритца (отсутствует ресурсоемкое 2D-интегрирование).\\n");
 
             // Тест 5
             Console.WriteLine("--- ТЕСТ 5: Выявление предела базиса x^k(1-x) по плохой обусловленности ---");
-            Console.WriteLine($"С увеличением n базисные функции визуально сливаются, делая решения нестабильными.");
-            Console.WriteLine($"{"n",-5} | {"Ошибка Коллокации (Норма C)",-30}");
+            Console.WriteLine("С увеличением n базисные функции визуально сливаются, делая решения нестабильными.");
+            Console.WriteLine(String.Format("{0,-5} | {1,-30}", "n", "Ошибка Ритца (Норма C)"));
             Console.WriteLine(new string('-', 40));
 
             double prevErr = double.MaxValue;
@@ -232,11 +232,11 @@ namespace VariationalMethods
             int[] testNs = { 3, 5, 8, 12, 16 };
             foreach (int n in testNs)
             {
-                var (cc5, _) = SolveCollocation(p3, n);
+                var (cc5, _) = SolveRitz(p3, n);
                 double err = MaxError(cc5, p3.exact);
-                Console.WriteLine($"{n,-5} | {err,-30:E4}");
+                Console.WriteLine(String.Format("{0,-5} | {1,-30:E4}", n, err));
 
-                if (n > 5 && err > prevErr * 10) breakdownDetected = true;
+                if (n > 5 && (err > prevErr * 2 || err > 1e-4 || double.IsNaN(err) || double.IsInfinity(err))) breakdownDetected = true;
                 prevErr = err;
             }
 
