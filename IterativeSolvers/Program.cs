@@ -293,7 +293,7 @@ namespace IterativeSolvers
             Assert(iterRel > 0 && iterRel < iterSimp, "Тест 4: Нестационарная релаксация сходится за меньшее число макро-циклов, чем простая итерация.\n");
 
             // Тест 5
-            Console.WriteLine("--- ТЕСТ 5 (Нетривиальный): Быстродействие на больших разреженных матрицах O(N) ---");
+            Console.WriteLine("--- ТЕСТ 5  Быстродействие на больших разреженных матрицах O(N) ---");
             Console.WriteLine("Генерация и решение 10000x10000...");
             SparseMatrix A5 = GenerateSPDMatrix(10000, 10);
             double[] b5 = new double[10000]; Array.Fill(b5, 2.0);
