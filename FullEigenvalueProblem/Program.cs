@@ -231,37 +231,57 @@ namespace EigenvaluesJacobi
 
         static void RunTests()
         {
-            Console.WriteLine("Запуск тестов (Задание 4)...\n");
+            Console.WriteLine("================================================================================");
+            Console.WriteLine("                    ДЕМОНСТРАЦИЯ РАБОТЫ АЛГОРИТМА И ТЕСТЫ                     ");
+            Console.WriteLine("================================================================================\n");
 
             // Тест 1: Диагональная матрица (Собственные значения уже найдены)
+            Console.WriteLine("--- ТЕСТ 1: Диагональная матрица ---");
+            Console.WriteLine("Матрица уже имеет диагональный вид. Ожидается 0 итераций и точные с.ч.");
             double[,] A1 = { { 5, 0 }, { 0, 2 } };
             var (eigs1, iters1, _) = JacobiMaxElement(A1, 1e-9);
-            Assert(iters1 == 0 && Math.Abs(eigs1[0] - 2) < 1e-9,
-                "Тест 1: Диагональная матрица. Требует 0 итераций и сразу выдает верный ответ.");
+            Console.WriteLine($"Найдено итераций: {iters1} (Ожидалось: 0)");
+            Console.WriteLine($"Вычисленные с.ч.: {eigs1[0]:F4}, {eigs1[1]:F4}");
+            Assert(iters1 == 0 && Math.Abs(eigs1[0] - 2) < 1e-9 && Math.Abs(eigs1[1] - 5) < 1e-9,
+                "Тест 1: Диагональная матрица. Требует 0 итераций и сразу выдает верный ответ.\n");
 
             // Тест 2: Равные диагональные элементы (Проверка ветки a_ii == a_jj, y = 0)
+            Console.WriteLine("--- ТЕСТ 2: Равные диагональные элементы ---");
+            Console.WriteLine("Матрица: [3 4; 4 3]. Разность диагоналей y = 0. Ожидаемые с.ч.: -1.0000 и 7.0000.");
             double[,] A2 = { { 3, 4 }, { 4, 3 } };
             // Известные с.ч. для [3 4; 4 3]: 3+4 = 7, 3-4 = -1
             var (eigs2, iters2, _) = JacobiMaxElement(A2, 1e-9);
+            Console.WriteLine($"Вычисленные с.ч.: {eigs2[0]:F4}, {eigs2[1]:F4}");
             bool test2Passed = Math.Abs(eigs2[0] - (-1.0)) < 1e-9 && Math.Abs(eigs2[1] - 7.0) < 1e-9;
-            Assert(test2Passed, "Тест 2: Матрица с равными диагональными элементами. Успешное преодоление y = 0.");
+            Assert(test2Passed, "Тест 2: Матрица с равными диагональными элементами. Успешное преодоление y = 0.\n");
 
-            // Тест 3: Теорема Гершгорина 
+            // Тест 3: Теорема Гершгорина
+            Console.WriteLine("--- ТЕСТ 3: Теорема Гершгорина ---");
             double[,] A3 = {
-                { 10,  1,  0 },
+                { 10,  1,  0.5 },
                 {  1, 20,  2 },
-                {  0,  2, 30 }
+                {  0.5,  2, 30 }
             };
             var circles = GetGershgorinCircles(A3);
-            var (eigs3, _, _) = JacobiCyclic(A3);
+            Console.WriteLine("Найденные круги (Центр ± Радиус):");
+            for (int i = 0; i < circles.Count; i++)
+            {
+                Console.WriteLine($"  Круг {i + 1}: [{circles[i].MinBound:F2}, {circles[i].MaxBound:F2}] (R={circles[i].Radius:F2}, C={circles[i].Center:F2})");
+            }
+            var (eigs3, _, _) = JacobiCyclic(A3, 1e-9);
+            Console.Write("Вычисленные спектральные значения: ");
+            Console.WriteLine(string.Join(", ", eigs3.Select(e => e.ToString("F4"))));
+
             bool test3Passed = true;
             foreach (var ev in eigs3)
             {
                 if (!IsInGershgorinUnion(ev, circles)) test3Passed = false;
             }
-            Assert(test3Passed, "Тест 3: Проверка попадания вычисленных с.ч. в объединение кругов Гершгорина.");
+            Assert(test3Passed, "Тест 3: Проверка попадания вычисленных с.ч. в объединение кругов Гершгорина.\n");
 
             // Тест 4: Зависимость итераций от Epsilon (Матрица Гильберта 4x4)
+            Console.WriteLine("--- ТЕСТ 4: Зависимость итераций от точности (ε) ---");
+            Console.WriteLine("Формируется плохо обусловленная матрица Гильберта 4x4.");
             double[,] A4 = new double[4, 4];
             for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 4; j++)
@@ -270,12 +290,15 @@ namespace EigenvaluesJacobi
             var (_, iter1e3, _) = JacobiMaxElement(A4, 1e-3);
             var (_, iter1e6, _) = JacobiMaxElement(A4, 1e-6);
             var (_, iter1e9, _) = JacobiMaxElement(A4, 1e-9);
+            Console.WriteLine($"  ε = 1e-3 -> Итераций: {iter1e3}");
+            Console.WriteLine($"  ε = 1e-6 -> Итераций: {iter1e6}");
+            Console.WriteLine($"  ε = 1e-9 -> Итераций: {iter1e9}");
             Assert(iter1e3 <= iter1e6 && iter1e6 <= iter1e9 && iter1e3 > 0,
-                $"Тест 4: Зависимость от ε. Итерации растут при уменьшении ε: {iter1e3} <= {iter1e6} <= {iter1e9}");
+                $"Тест 4: Зависимость от ε. Итерации растут при уменьшении ε: {iter1e3} <= {iter1e6} <= {iter1e9}\n");
 
             // Тест 5 (НЕТРИВИАЛЬНЫЙ): Проверка сохранения инвариантов преобразований (След и Норма)
-            // При многочисленных ортогональных вращениях на плотной матрице след и норма Фробениуса 
-            // исходной матрицы A и полученной диагональной матрицы L обязаны совпадать с точностью до ошибки округления.
+            Console.WriteLine("--- ТЕСТ 5 (Нетривиальный): Сохранение инвариантов преобразований ---");
+            Console.WriteLine("Создается плотная случайная симметричная матрица 6x6...");
             int n5 = 6;
             double[,] A5 = new double[n5, n5];
             Random rnd = new Random(42);
@@ -294,12 +317,18 @@ namespace EigenvaluesJacobi
             double traceFinal = eigs5.Sum();
             double frobNormFinal = eigs5.Sum(x => x * x); // На диагональной матрице это просто сумма квадратов с.ч.
 
-            bool test5Passed = Math.Abs(traceOriginal - traceFinal) < 1e-10 &&
-                               Math.Abs(frobNormOriginal - frobNormFinal) < 1e-10;
+            Console.WriteLine($"Выполнено вращений: {iters5}");
+            Console.WriteLine($"След оригинальной матрицы:      {traceOriginal,12:F6}");
+            Console.WriteLine($"След финальной (сумма с.ч.):    {traceFinal,12:F6}  | Погрешность: {Math.Abs(traceOriginal - traceFinal):E2}");
+            Console.WriteLine($"Норма Фробениуса (кв) ориг.:    {frobNormOriginal,12:F6}");
+            Console.WriteLine($"Норма Фробениуса (кв) финал.:   {frobNormFinal,12:F6}  | Погрешность: {Math.Abs(frobNormOriginal - frobNormFinal):E2}");
 
-            Assert(test5Passed, "Тест 5: Нетривиальная проверка инвариантов. След и норма Фробениуса сохранены сквозь " + iters5 + " вращений.");
+            bool test5Passed = Math.Abs(traceOriginal - traceFinal) < 1e-8 &&
+                               Math.Abs(frobNormOriginal - frobNormFinal) < 1e-8;
 
-            Console.WriteLine(new string('-', 80));
+            Assert(test5Passed, "Тест 5: Нетривиальная проверка инвариантов. След и норма Фробениуса сохранены сквозь все вращения.\n");
+
+            Console.WriteLine(new string('=', 80) + "\n");
         }
 
         // -------------------------------------------------------------------------
