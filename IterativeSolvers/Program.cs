@@ -126,7 +126,7 @@ namespace IterativeSolvers
             return (x, iter, sw.Elapsed.TotalMilliseconds);
         }
 
-        // 3. Метод релаксации (по Березину и Жидкову [1])
+        // 3. Метод релаксации (по Березину и Жидкову)
         // В каждом цикле обновляем все n неизвестных. На каждом шаге цикла выбираем уравнение
         // с наибольшей невязкой из еще не использованных в текущем цикле.
         static (double[] x, int iters, double ms) Relaxation(SparseMatrix A, double[] b, double tol = 1e-6, int maxIter = 10000)
