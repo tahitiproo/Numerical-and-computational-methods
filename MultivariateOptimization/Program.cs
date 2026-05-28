@@ -228,7 +228,7 @@ namespace MultivariateOptimization
 
         static void RunTests()
         {
-            Console.WriteLine("Запуск нетривиальных тестов...\n");
+            Console.WriteLine("Запуск тестов...\n");
 
             // Тест 1
             var oracle1 = new Oracle();
